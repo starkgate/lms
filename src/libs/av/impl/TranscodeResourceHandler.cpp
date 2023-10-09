@@ -69,7 +69,7 @@ namespace Av
 		{
 			Wt::Http::ResponseContinuation *continuation {response.createContinuation()};
 			continuation->waitForMoreData();
-			_transcoder.asyncRead(_buffer.data(), _buffer.size(), [=](std::size_t nbBytesRead)
+			_transcoder.asyncRead(_buffer.data(), _buffer.size(), [this, continuation](std::size_t nbBytesRead)
 			{
 				assert(_bytesReadyCount == 0);
 				_bytesReadyCount = nbBytesRead;

@@ -47,7 +47,7 @@ Filters::showDialog()
 	Wt::WComboBox* valueCombo {dialog->bindNew<Wt::WComboBox>("value")};
 
 	Wt::WPushButton* addBtn {dialog->bindNew<Wt::WPushButton>("add-btn", Wt::WString::tr("Lms.Explore.add-filter"))};
-	addBtn->clicked().connect([=]
+	addBtn->clicked().connect([=, this]
 	{
 		const std::string type {typeCombo->valueText().toUTF8()};
 		const std::string value {valueCombo->valueText().toUTF8()};
@@ -103,7 +103,7 @@ Filters::showDialog()
 		}
 	}
 
-	typeCombo->changed().connect([=]
+	typeCombo->changed().connect([=, this]
 	{
 		const std::string name {typeCombo->valueText().toUTF8()};
 
@@ -140,7 +140,7 @@ Filters::add(ClusterId clusterId)
 
 	_clusterIds.push_back(clusterId);
 
-	filter->clicked().connect([=]
+	filter->clicked().connect([this, filter, clusterId]
 	{
 		_filters->removeWidget(filter);
 		_clusterIds.erase(std::remove_if(std::begin(_clusterIds), std::end(_clusterIds), [clusterId](ClusterId id) { return id == clusterId; }), std::end(_clusterIds));

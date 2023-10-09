@@ -251,9 +251,9 @@ namespace Scrobbling::ListenBrainz
 			saveListen(timedListen, Database::ScrobblingState::PendingAdd);
 
 			request.priority = Http::ClientRequestParameters::Priority::Normal;
-			request.onSuccessFunc = [=](std::string_view)
+			request.onSuccessFunc = [=, this](std::string_view)
 			{
-				_strand.dispatch([=]
+				_strand.dispatch([=, this]
 				{
 					if (saveListen(timedListen, Database::ScrobblingState::Synchronized))
 					{
@@ -501,9 +501,9 @@ namespace Scrobbling::ListenBrainz
 		Http::ClientGETRequestParameters request;
 		request.relativeUrl = "/1/user/" + std::string {context.listenBrainzUserName} + "/listen-count";
 		request.priority = Http::ClientRequestParameters::Priority::Low;
-		request.onSuccessFunc = [=, &context] (std::string_view msgBody)
+		request.onSuccessFunc = [=, this, &context] (std::string_view msgBody)
 			{
-				_strand.dispatch([=, &context]
+				_strand.dispatch([=, this, &context]
 				{
 					const auto listenCount = parseListenCount(msgBody);
 					if (listenCount)
@@ -538,7 +538,7 @@ namespace Scrobbling::ListenBrainz
 		Http::ClientGETRequestParameters request;
 		request.relativeUrl = "/1/user/" + context.listenBrainzUserName + "/listens?max_ts=" + std::to_string(context.maxDateTime.toTime_t());
 		request.priority = Http::ClientRequestParameters::Priority::Low;
-		request.onSuccessFunc = [=, &context] (std::string_view msgBody)
+		request.onSuccessFunc = [this, &context] (std::string_view msgBody)
 			{
 				processGetListensResponse(msgBody, context);
 				if (context.fetchedListenCount >= _maxSyncListenCount || !context.maxDateTime.isValid())
@@ -549,7 +549,7 @@ namespace Scrobbling::ListenBrainz
 
 				enqueGetListens(context);
 			};
-		request.onFailureFunc = [=, &context]
+		request.onFailureFunc = [this, &context]
 			{
 				onSyncEnded(context);
 			};

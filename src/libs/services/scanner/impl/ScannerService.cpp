@@ -146,7 +146,7 @@ void
 ScannerService::requestImmediateScan(bool force)
 {
 	abortScan();
-	_ioService.post([=]()
+	_ioService.post([this, force]
 	{
 		if (_abortScan)
 			return;
@@ -159,7 +159,7 @@ void
 ScannerService::requestReload()
 {
 	abortScan();
-	_ioService.post([=]()
+	_ioService.post([this]
 	{
 		if (_abortScan)
 			return;
@@ -240,7 +240,7 @@ ScannerService::scheduleNextScan()
 void
 ScannerService::scheduleScan(bool force, const Wt::WDateTime& dateTime)
 {
-	auto cb {[=](boost::system::error_code ec)
+	auto cb {[this, force](boost::system::error_code ec)
 	{
 		if (ec)
 			return;

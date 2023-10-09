@@ -137,9 +137,9 @@ namespace Scrobbling::ListenBrainz
 			request.message.addBodyText(Wt::Json::serialize(root));
 			request.message.addHeader("Content-Type", "application/json");
 
-			request.onSuccessFunc = [=](std::string_view /*msgBody*/)
+			request.onSuccessFunc = [=, this](std::string_view /*msgBody*/)
 			{
-				_strand.dispatch([=]
+				_strand.dispatch([=, this]
 				{
 					onFeedbackSent(type, starredTrackId);
 				});
@@ -419,7 +419,7 @@ namespace Scrobbling::ListenBrainz
 					}
 				});
 			};
-		request.onFailureFunc = [=, &context]
+		request.onFailureFunc = [this, &context]
 			{
 				onSyncEnded(context);
 			};

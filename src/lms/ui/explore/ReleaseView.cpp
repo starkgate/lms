@@ -272,7 +272,7 @@ Release::refreshView()
 			{
 				const ClusterId clusterId {cluster->getId()};
 				Wt::WInteractWidget* entry {clusterContainers->addWidget(Utils::createCluster(clusterId))};
-				entry->clicked().connect([=]
+				entry->clicked().connect([this, clusterId]
 				{
 					_filters.add(clusterId);
 				});
@@ -281,25 +281,25 @@ Release::refreshView()
 	}
 
 	bindNew<Wt::WPushButton>("play-btn", Wt::WString::tr("Lms.Explore.play"), Wt::TextFormat::XHTML)
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			_playQueueController.processCommand(PlayQueueController::Command::Play, {_releaseId});
 		});
 
 	bindNew<Wt::WPushButton>("play-shuffled", Wt::WString::tr("Lms.Explore.play-shuffled"), Wt::TextFormat::Plain)
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			_playQueueController.processCommand(PlayQueueController::Command::PlayShuffled, {_releaseId});
 		});
 
 	bindNew<Wt::WPushButton>("play-next", Wt::WString::tr("Lms.Explore.play-next"), Wt::TextFormat::Plain)
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			_playQueueController.processCommand(PlayQueueController::Command::PlayNext, {_releaseId});
 		});
 
 	bindNew<Wt::WPushButton>("play-last", Wt::WString::tr("Lms.Explore.play-last"), Wt::TextFormat::Plain)
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			_playQueueController.processCommand(PlayQueueController::Command::PlayOrAddLast, {_releaseId});
 		});
@@ -308,16 +308,16 @@ Release::refreshView()
 		->setLink(Wt::WLink {std::make_unique<DownloadReleaseResource>(_releaseId)});
 
 	bindNew<Wt::WPushButton>("release-info", Wt::WString::tr("Lms.Explore.release-info"))
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			showReleaseInfoModal(_releaseId);
 		});
 
 	{
-		auto isStarred {[=] { return Service<Scrobbling::IScrobblingService>::get()->isStarred(LmsApp->getUserId(), _releaseId); }};
+		auto isStarred {[this] { return Service<Scrobbling::IScrobblingService>::get()->isStarred(LmsApp->getUserId(), _releaseId); }};
 
 		Wt::WPushButton* starBtn {bindNew<Wt::WPushButton>("star", Wt::WString::tr(isStarred() ? "Lms.Explore.unstar" : "Lms.Explore.star"))};
-		starBtn->clicked().connect([=]
+		starBtn->clicked().connect([=, this]
 		{
 			if (isStarred())
 			{
@@ -412,7 +412,7 @@ Release::refreshView()
 		}
 
 		Wt::WPushButton* playBtn {entry->bindNew<Wt::WPushButton>("play-btn", Wt::WString::tr("Lms.template.play-btn"), Wt::TextFormat::XHTML)};
-		playBtn->clicked().connect([=]
+		playBtn->clicked().connect([this, trackId]
 		{
 			_playQueueController.playTrackInRelease(trackId);
 		});
@@ -420,17 +420,17 @@ Release::refreshView()
 		{
 			entry->bindNew<Wt::WPushButton>("more-btn", Wt::WString::tr("Lms.template.more-btn"), Wt::TextFormat::XHTML);
 			entry->bindNew<Wt::WPushButton>("play", Wt::WString::tr("Lms.Explore.play"))
-				->clicked().connect([=]
+				->clicked().connect([this, trackId]
 				{
 					_playQueueController.playTrackInRelease(trackId);
 				});
 			entry->bindNew<Wt::WPushButton>("play-next", Wt::WString::tr("Lms.Explore.play-next"))
-				->clicked().connect([=]
+				->clicked().connect([this, trackId]
 				{
 					_playQueueController.processCommand(PlayQueueController::Command::PlayNext, {trackId});
 				});
 			entry->bindNew<Wt::WPushButton>("play-last", Wt::WString::tr("Lms.Explore.play-last"))
-				->clicked().connect([=]
+				->clicked().connect([this, trackId]
 				{
 					_playQueueController.processCommand(PlayQueueController::Command::PlayOrAddLast, {trackId});
 				});
@@ -438,7 +438,7 @@ Release::refreshView()
 			auto isStarred {[=] { return Service<Scrobbling::IScrobblingService>::get()->isStarred(LmsApp->getUserId(), trackId); }};
 
 			Wt::WPushButton* starBtn {entry->bindNew<Wt::WPushButton>("star", Wt::WString::tr(isStarred() ? "Lms.Explore.unstar" : "Lms.Explore.star"))};
-			starBtn->clicked().connect([=]
+			starBtn->clicked().connect([=, this]
 			{
 				auto transaction {LmsApp->getDbSession().createUniqueTransaction()};
 
@@ -458,7 +458,7 @@ Release::refreshView()
 				->setLink(Wt::WLink {std::make_unique<DownloadTrackResource>(trackId)});
 
 			entry->bindNew<Wt::WPushButton>("track-info", Wt::WString::tr("Lms.Explore.track-info"))
-				->clicked().connect([=] { TrackListHelpers::showTrackInfoModal(trackId, _filters); });
+				->clicked().connect([this, trackId] { TrackListHelpers::showTrackInfoModal(trackId, _filters); });
 		}
 
 		entry->bindString("duration", Utils::durationToString(track->getDuration()), Wt::TextFormat::Plain);

@@ -62,7 +62,7 @@ namespace UserInterface
 		_tracks = bindNew<InfiniteScrollingContainer>("tracks");
 		_tracks->onRequestElements.connect([this] { addSomeTracks(); });
 
-		filters.updated().connect([=]
+		filters.updated().connect([this]
 		{
 			refreshView();
 		});

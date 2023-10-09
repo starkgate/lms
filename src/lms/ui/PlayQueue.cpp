@@ -126,13 +126,13 @@ PlayQueue::PlayQueue()
 	addFunction("tr", &Wt::WTemplate::Functions::tr);
 
 	Wt::WPushButton* clearBtn {bindNew<Wt::WPushButton>("clear-btn", Wt::WString::tr("Lms.PlayQueue.template.clear-btn"), Wt::TextFormat::XHTML)};
-	clearBtn->clicked().connect([=]
+	clearBtn->clicked().connect([this]
 	{
 		clearTracks();
 	});
 
 	Wt::WPushButton* saveBtn {bindNew<Wt::WPushButton>("save-btn", Wt::WString::tr("Lms.PlayQueue.template.save-btn"), Wt::TextFormat::XHTML)};
-	saveBtn->clicked().connect([=]
+	saveBtn->clicked().connect([this]
 	{
 		saveAsTrackList();
 	});
@@ -145,7 +145,7 @@ PlayQueue::PlayQueue()
 	});
 
 	Wt::WPushButton* shuffleBtn {bindNew<Wt::WPushButton>("shuffle-btn", Wt::WString::tr("Lms.PlayQueue.template.shuffle-btn"), Wt::TextFormat::XHTML)};
-	shuffleBtn->clicked().connect([=]
+	shuffleBtn->clicked().connect([this]
 	{
 		{
 			auto transaction {LmsApp->getDbSession().createUniqueTransaction()};
@@ -163,7 +163,7 @@ PlayQueue::PlayQueue()
 	});
 
 	_repeatBtn = bindNew<Wt::WCheckBox>("repeat-btn");
-	_repeatBtn->clicked().connect([=]
+	_repeatBtn->clicked().connect([this]
 	{
 		auto transaction {LmsApp->getDbSession().createUniqueTransaction()};
 
@@ -177,7 +177,7 @@ PlayQueue::PlayQueue()
 	}
 
 	_radioBtn = bindNew<Wt::WCheckBox>("radio-btn");
-	_radioBtn->clicked().connect([=]
+	_radioBtn->clicked().connect([this]
 	{
 		{
 			auto transaction {LmsApp->getDbSession().createUniqueTransaction()};
@@ -203,7 +203,7 @@ PlayQueue::PlayQueue()
 	_nbTracks = bindNew<Wt::WText>("track-count");
 	_duration = bindNew<Wt::WText>("duration");
 
-	LmsApp->getMediaPlayer().settingsLoaded.connect([=]
+	LmsApp->getMediaPlayer().settingsLoaded.connect([this]
 	{
 		if (_mediaPlayerSettingsLoaded)
 			return;
@@ -220,7 +220,7 @@ PlayQueue::PlayQueue()
 		loadTrack(trackPos, false);
 	});
 
-	LmsApp->preQuit().connect([=]
+	LmsApp->preQuit().connect([this]
 	{
 		auto transaction {LmsApp->getDbSession().createUniqueTransaction()};
 
@@ -560,7 +560,7 @@ PlayQueue::addEntry(const Database::TrackListEntry::pointer& tracklistEntry)
 	entry->bindString("duration", Utils::durationToString(track->getDuration()), Wt::TextFormat::Plain);
 
 	Wt::WPushButton* playBtn {entry->bindNew<Wt::WPushButton>("play-btn", Wt::WString::tr("Lms.template.play-btn"), Wt::TextFormat::XHTML)};
-	playBtn->clicked().connect([=]
+	playBtn->clicked().connect([this, entry]
 	{
 		const std::optional<std::size_t> pos {_entriesContainer->getIndexOf(*entry)};
 		if (pos)
@@ -569,7 +569,7 @@ PlayQueue::addEntry(const Database::TrackListEntry::pointer& tracklistEntry)
 
 	Wt::WPushButton* delBtn {entry->bindNew<Wt::WPushButton>("del-btn", Wt::WString::tr("Lms.template.delete-btn"), Wt::TextFormat::XHTML)};
 	delBtn->setToolTip(Wt::WString::tr("Lms.delete"));
-	delBtn->clicked().connect([=]
+	delBtn->clicked().connect([this, entry, tracklistEntryId]
 	{
 		// Remove the entry n both the widget tree and the playqueue
 		{
@@ -595,7 +595,7 @@ PlayQueue::addEntry(const Database::TrackListEntry::pointer& tracklistEntry)
 
 	entry->bindNew<Wt::WPushButton>("more-btn", Wt::WString::tr("Lms.template.more-btn"), Wt::TextFormat::XHTML);
 	entry->bindNew<Wt::WPushButton>("play", Wt::WString::tr("Lms.Explore.play"))
-		->clicked().connect([=]
+		->clicked().connect([this, entry]
 		{
 			const std::optional<std::size_t> pos {_entriesContainer->getIndexOf(*entry)};
 			if (pos)
@@ -762,7 +762,7 @@ PlayQueue::saveAsTrackList()
 	replaceTrackList->updateView(replaceTrackListModel.get());
 
 	auto* saveBtn {modal->bindNew<Wt::WPushButton>("save-btn", Wt::WString::tr("Lms.save"))};
-	saveBtn->clicked().connect([=]
+	saveBtn->clicked().connect([=, this]
 	{
 		bool success {};
 		switch (contentStack->currentIndex())

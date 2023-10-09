@@ -46,7 +46,7 @@ Releases::Releases(Filters& filters, PlayQueueController& playQueueController)
 	auto bindMenuItem {[this](const std::string& var, const Wt::WString& title, ReleaseCollector::Mode mode)
 	{
 		auto *menuItem {bindNew<Wt::WPushButton>(var, title)};
-		menuItem->clicked().connect([=]
+		menuItem->clicked().connect([=, this]
 		{
 			refreshView(mode);
 			_currentActiveItem->removeStyleClass("active");
@@ -75,17 +75,17 @@ Releases::Releases(Filters& filters, PlayQueueController& playQueueController)
 	});
 
 	bindNew<Wt::WPushButton>("play-shuffled", Wt::WString::tr("Lms.Explore.play-shuffled"), Wt::TextFormat::Plain)
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			_playQueueController.processCommand(PlayQueueController::Command::PlayShuffled, getAllReleases());
 		});
 	bindNew<Wt::WPushButton>("play-next", Wt::WString::tr("Lms.Explore.play-next"), Wt::TextFormat::Plain)
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			_playQueueController.processCommand(PlayQueueController::Command::PlayNext, getAllReleases());
 		});
 	bindNew<Wt::WPushButton>("play-last", Wt::WString::tr("Lms.Explore.play-last"), Wt::TextFormat::Plain)
-		->clicked().connect([=]
+		->clicked().connect([this]
 		{
 			_playQueueController.processCommand(PlayQueueController::Command::PlayOrAddLast, getAllReleases());
 		});
